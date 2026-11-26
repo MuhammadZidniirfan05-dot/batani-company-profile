@@ -1,0 +1,47 @@
+
+# Logs
+*.log
+
+# Operating System
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# PHP / Laravel
+.phpactor.json
+.phpunit.result.cache
+/.phpunit.cache
+/auth.json
+/vendor
+
+# IDE and Editors
+/.fleet
+/.idea
+/.nova
+/.vscode
+/.zed
+
+# Node.js
+/node_modules
+
+# Laravel Build Files
+/public/build
+/public/hot
+/public/storage
+
+# Filament Assets
+/public/css/filament
+/public/fonts/filament
+/public/js/filament
+
+# Laravel Storage
+/storage/*.key
+/storage/pail
+
+# Homestead
+Homestead.json
+Homestead.yaml
