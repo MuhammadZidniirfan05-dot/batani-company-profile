@@ -27,6 +27,11 @@ class ContactMessage extends Model
         ];
     }
 
+    public function scopeNew($query)
+    {
+        return $query->where('status', 'new');
+    }
+
     public function scopeUnread($query)
     {
         return $query->where('status', 'new');
@@ -35,5 +40,10 @@ class ContactMessage extends Model
     public function scopeProcessing($query)
     {
         return $query->where('status', 'processing');
+    }
+
+    public function scopeCompleted($query)
+    {
+        return $query->where('status', 'completed');
     }
 }

@@ -43,11 +43,17 @@ class TeamMember extends Model
 
     public function scopeExecutiveDirector($query)
     {
-        return $query->where('member_type', 'executive_director');
+        return $query->where(
+            'member_type',
+            'executive_director'
+        );
     }
 
     public function scopeExperts($query)
     {
-        return $query->where('member_type', 'expert');
+        return $query->where(
+            'member_type',
+            'expert'
+        );
     }
 }

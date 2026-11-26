@@ -30,4 +30,9 @@ class CompanyValue extends Model
     {
         return 'slug';
     }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
 }

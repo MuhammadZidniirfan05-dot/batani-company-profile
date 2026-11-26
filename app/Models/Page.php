@@ -33,4 +33,14 @@ class Page extends Model
     {
         return 'slug';
     }
+
+    public function scopePublished($query)
+    {
+        return $query
+            ->where('status', 'published')
+            ->where(function ($query) {
+                $query->whereNull('published_at')
+                    ->orWhere('published_at', '<=', now());
+            });
+    }
 }

@@ -29,7 +29,6 @@ class ItProject extends Model
         'published_at',
         'seo_title',
         'seo_description',
-        'views_count',
     ];
 
     protected function casts(): array
@@ -40,7 +39,6 @@ class ItProject extends Model
             'started_at' => 'date',
             'completed_at' => 'date',
             'published_at' => 'datetime',
-            'views_count' => 'integer',
         ];
     }
 
@@ -54,7 +52,10 @@ class ItProject extends Model
 
     public function author(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(
+            User::class,
+            'user_id'
+        );
     }
 
     public function getRouteKeyName(): string
