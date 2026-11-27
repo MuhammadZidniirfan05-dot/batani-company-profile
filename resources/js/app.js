@@ -3,7 +3,19 @@ import { createInertiaApp } from "@inertiajs/vue3";
 import { resolvePageComponent } from "laravel-vite-plugin/inertia-helpers";
 
 createInertiaApp({
-    title: (title) => (title ? `${title} | BATANI` : "BATANI"),
+    title: (title) => {
+        const value = (title ?? "").trim();
+
+        if (!value || value.toUpperCase() === "BATANI") {
+            return "BATANI";
+        }
+
+        if (/\|\s*BATANI$/i.test(value)) {
+            return value;
+        }
+
+        return `${value} | BATANI`;
+    },
 
     resolve: (name) =>
         resolvePageComponent(
