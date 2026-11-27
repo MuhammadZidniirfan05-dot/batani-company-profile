@@ -27,20 +27,53 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+
+            // AUTENTIKASI
+
             ->login()
+
+            // OTORISASI
+
+            ->strictAuthorization()
+
+            // KONFIGURASI PANEL
+
             ->colors([
                 'primary' => Color::Amber,
             ])
-            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
-            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
+
+            // REGISTRASI RESOURCE
+
+            ->discoverResources(
+                in: app_path('Filament/Resources'),
+                for: 'App\Filament\Resources'
+            )
+
+            // REGISTRASI HALAMAN
+
+            ->discoverPages(
+                in: app_path('Filament/Pages'),
+                for: 'App\Filament\Pages'
+            )
+
             ->pages([
                 Dashboard::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
+
+            // REGISTRASI WIDGET
+
+            ->discoverWidgets(
+                in: app_path('Filament/Widgets'),
+                for: 'App\Filament\Widgets'
+            )
+
             ->widgets([
                 AccountWidget::class,
                 FilamentInfoWidget::class,
             ])
+
+            // MIDDLEWARE PANEL
+
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
@@ -52,8 +85,11 @@ class AdminPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
+
+            // MIDDLEWARE AUTENTIKASI
+
             ->authMiddleware([
                 Authenticate::class,
-            ]);
+            ], isPersistent: true);
     }
 }
