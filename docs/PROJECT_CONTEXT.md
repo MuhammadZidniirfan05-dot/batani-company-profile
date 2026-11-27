@@ -4,7 +4,7 @@
 
 BATANI Company Profile adalah aplikasi Laravel yang sudah ada; jangan membuat project pengganti. Repository [batani-company-profile](https://github.com/MuhammadZidniirfan05-dot/batani-company-profile) bersifat publik, branch utama main. Audit 27 November 2026 memakai baseline `2d8e1647cc8dd6206c3df6fd5ab025a124559f25`.
 
-Pada awal perencanaan, working tree bersih dan main sama dengan origin/main; GitHub CLI terautentikasi dengan akses ADMIN. Belum ada Issue/PR/milestone sebelum inisialisasi. Kini [Issue #1](https://github.com/MuhammadZidniirfan05-dot/batani-company-profile/issues/1) berada pada [M1](https://github.com/MuhammadZidniirfan05-dot/batani-company-profile/milestone/1), dengan linked branch docs/1-multi-agent-workflow. Status mutakhir harus dibaca dari GitHub, bukan diasumsikan dari snapshot ini.
+Pada awal perencanaan, working tree bersih dan main sama dengan origin/main; GitHub CLI terautentikasi dengan akses ADMIN. [Issue #1](https://github.com/MuhammadZidniirfan05-dot/batani-company-profile/issues/1) selesai melalui [PR #2](https://github.com/MuhammadZidniirfan05-dot/batani-company-profile/pull/2), squash `45e957791ce1da8594b57e239c5be0c8e90953ea`. [Issue #3](https://github.com/MuhammadZidniirfan05-dot/batani-company-profile/issues/3) mengerjakan baseline pengujian terisolasi pada [M1](https://github.com/MuhammadZidniirfan05-dot/batani-company-profile/milestone/1). Status mutakhir harus dibaca dari GitHub.
 
 Lingkungan pengembangan menggunakan Windows, Laragon, VS Code, Git, GitHub CLI dan NPM. Konteks pengguna menyebut PHP 8.5.12 dan Node.js 22, sedangkan audit CLI menemukan PHP 8.5.10 dan Node.js 24.14.1. Verifikasi ulang runtime pada setiap pekerjaan; jangan mengupgrade hanya untuk menyamakan angka.
 
@@ -33,7 +33,7 @@ Lingkungan pengembangan menggunakan Windows, Laragon, VS Code, Git, GitHub CLI d
 
 ## Batas verifikasi
 
-[tests](../tests) hanya berisi dua test contoh: unit assertTrue dan feature GET homepage. [phpunit.xml](../phpunit.xml) memakai SQLite in-memory; feature test belum menyiapkan schema/data homepage. Audit ini tidak menjalankan tests aplikasi, build, migration, full CI, atau pengujian fungsional CMS. Jangan menyatakan semuanya lulus.
+[tests](../tests) mencakup test homepage, health dan guard isolasi serta satu test unit contoh. [phpunit.xml](../phpunit.xml) memilih SQLite in-memory; migration eksisting dijalankan oleh test homepage pada database sementara. Lihat [panduan pengujian](TESTING.md) untuk perintah dan keterbatasan. Pengujian ini tidak membuktikan fungsi seluruh CMS, kompatibilitas MySQL, full CI atau staging.
 
 Staging dilaporkan sudah berhasil di-deploy oleh pengguna dan pernah memberi respons HTTPS/login admin. VPS, database, jumlah tabel, dan seluruh fungsi staging belum diverifikasi dalam pekerjaan dokumentasi ini. Detail operasional tidak disalin ke repository publik. Pipeline CI/CD belum tersedia pada baseline; desain dalam [workflow](WORKFLOW.md) adalah rencana M1, bukan pipeline aktif.
 
