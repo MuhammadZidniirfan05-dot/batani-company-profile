@@ -9,14 +9,14 @@ class UserPolicy extends AdminOnlyPolicy
 {
     public function create(User $user): bool
     {
-        return false;
+        return $user->isSuperAdmin();
     }
 
     public function update(
         User $user,
         Model $record
     ): bool {
-        return false;
+        return $user->isSuperAdmin();
     }
 
     public function delete(
