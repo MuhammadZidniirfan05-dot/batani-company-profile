@@ -1,0 +1,23 @@
+# Roadmap BATANI
+
+Snapshot 27 November 2026. Satu pekerjaan implementasi aktif: [Issue #1 — dokumentasi workflow](https://github.com/MuhammadZidniirfan05-dot/batani-company-profile/issues/1), branch docs/1-multi-agent-workflow. Pekerjaan ini belum dianggap selesai sebelum review dan merge. Gunakan GitHub untuk status terkini; dokumen ini tidak menjadi bukti CI atau deployment.
+
+[M1 — Development Infrastructure](https://github.com/MuhammadZidniirfan05-dot/batani-company-profile/milestone/1) tetap terbuka. Milestone/Issue berikut di bawah adalah rencana; jangan membuat seluruh Issue sekaligus. Planner memecah pekerjaan berdasarkan audit dan checkpoint fungsional, tanpa jumlah Issue yang kaku.
+
+| Milestone | Deliverables | Dependensi dan checkpoint | Status snapshot |
+| --- | --- | --- | --- |
+| M1 — Development Infrastructure | Multi-Agent Workflow, AGENTS, Project Context, Roadmap, Issue/PR templates, labels/milestones, Continuous Integration, batch deployment pipeline, pengujian CI/CD | Dokumentasi direview lebih dahulu; CI dan pipeline dalam Issue terpisah. Full CI pada SHA terpilih dan uji batch deployment yang diizinkan menjadi checkpoint infrastruktur. | Berjalan: milestone/8 label tersedia; Issue #1 aktif; pipeline dan pengujiannya belum tersedia. |
+| M2 — Backend Restructuring | Pelepasan kategori bertahap, sidebar/empat menu konten, Project Teknologi, models/controllers/routes/policies, homepage, global search, batch audit/deployment | Memakai workflow M1. Audit kategori sebelum perubahan; izin eksplisit dan backup sebelum penghapusan schema. Checkpoint: CMS tanpa ketergantungan kategori dan modul baru terintegrasi, regresi/RBAC/URL teruji. | Direncanakan; belum diimplementasikan. |
+| M3 — Social Media Management and AI | Schema sosial, pengelolaan akun/post, AI Service, Automatic Caption Generator, caption per platform, preview/approval, batch audit/deployment | Berita/backend M2 stabil. Checkpoint: draft caption bersumber berita, edit/preview/approval dan status tersimpan; layanan berbayar hanya setelah izin. | Direncanakan. |
+| M4 — Instagram and Facebook Integration | Meta API, publikasi Instagram/Facebook, Queue, Scheduler, retry, history, monitoring, batch audit/deployment | Model akun/post/approval M3 tersedia; persyaratan Meta diverifikasi saat implementasi. Checkpoint: publish/jadwal/retry tanpa duplikasi dan kegagalan terpantau; posting nyata hanya dengan izin. | Direncanakan. |
+| M5 — Frontend Functional Integration | Public layout/navbar/footer, homepage, Tentang Kami, seluruh submenu Layanan, Publikasi Riset, Berita, Project IT, Project Teknologi, kontak, global search, SEO, batch audit/deployment | Backend dan integrasi sosial mencapai checkpoint M2–M4 yang disepakati. Checkpoint: semua halaman/navigasi dan kontrak props berfungsi, kompatibilitas URL dan integrasi teruji. | Fondasi frontend ada; deliverables milestone belum selesai. |
+| M6 — UI/UX and Finalization | Design system, identitas visual, responsive design, optimasi performa, security testing, E2E testing, final deployment | Integrasi fungsional M5 stabil. Checkpoint: UX/responsif/performa/keamanan/E2E memenuhi kriteria terukur yang ditetapkan Planner, lalu deployment final diizinkan dan terverifikasi. | Direncanakan. |
+
+## Gerbang kemajuan
+
+- Semua kebutuhan produk rinci ada pada [Project Context](PROJECT_CONTEXT.md); mekanisme review/CI/deployment ada pada [Workflow](WORKFLOW.md).
+- Setiap Issue: scope terbatas, acceptance criteria terukur, targeted checks, review dan PR tersendiri. Jangan membuka pekerjaan berikutnya sebelum blocking findings selesai.
+- Full CI dijalankan saat checkpoint membentuk fungsi utuh, milestone siap, perlu integrasi, pengguna meminta deployment, atau perbaikan kritis. PR checks ringan boleh jika diperlukan/diwajibkan.
+- Deployment memakai SHA persis yang lulus full CI. Jangan otomatis deploy tiap merge/push main. M1 tidak selesai hanya karena Issue #1 merged.
+- Tutup milestone hanya setelah semua deliverables, full CI dan deployment yang diwajibkan berhasil dengan bukti. Catat tanggal, SHA, hasil checks/deployment dan tautan PR saat memperbarui status.
+- Setelah merge, Reviewer memperbarui progres dan kembali Planner untuk satu Issue berikutnya. Perubahan file roadmap harus melalui branch/PR, bukan push langsung main. Jangan menutup milestone atau mengklaim deployed tanpa bukti.

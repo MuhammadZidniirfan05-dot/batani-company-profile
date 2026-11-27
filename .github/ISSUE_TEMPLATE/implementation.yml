@@ -1,0 +1,109 @@
+name: Rencana implementasi
+description: Rencana pekerjaan BATANI dengan scope, kriteria penerimaan dan validasi.
+title: "[MILESTONE] Judul pekerjaan"
+labels: [planned]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Planner memilih milestone yang sesuai dan memeriksa duplikasi sebelum membuat Issue.
+        Isi semua bagian; bila tidak relevan, tulis N/A beserta alasan. Jangan memasukkan rahasia atau detail infrastruktur sensitif.
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objective
+      description: Tujuan dan hasil yang diharapkan.
+    validations:
+      required: true
+  - type: textarea
+    id: background
+    attributes:
+      label: Background
+      description: Bukti audit, baseline, masalah dan dependensi; bedakan fakta dengan asumsi.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: Perubahan yang diizinkan dalam pekerjaan ini.
+    validations:
+      required: true
+  - type: textarea
+    id: out_of_scope
+    attributes:
+      label: Out of Scope
+      description: Batas pekerjaan yang tidak boleh dikerjakan.
+    validations:
+      required: true
+  - type: textarea
+    id: technical_plan
+    attributes:
+      label: Technical Implementation Plan
+      description: Langkah implementasi, dependensi dan keputusan teknis.
+    validations:
+      required: true
+  - type: textarea
+    id: affected_files
+    attributes:
+      label: Affected Files
+      description: File atau direktori terdampak dan alasan perubahan.
+    validations:
+      required: true
+  - type: textarea
+    id: database_impact
+    attributes:
+      label: Database Impact
+      description: Schema/data/migration, kompatibilitas, backup dan persetujuan destruktif; atau N/A beralasan.
+    validations:
+      required: true
+  - type: textarea
+    id: security_requirements
+    attributes:
+      label: Security Requirements
+      description: Validasi, otorisasi, sanitasi, rahasia dan persetujuan yang diperlukan.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance Criteria
+      description: Checklist AC bernomor yang spesifik, terukur dan dapat diverifikasi.
+      placeholder: "- [ ] AC1: Kondisi dan hasil yang dapat diuji."
+    validations:
+      required: true
+  - type: textarea
+    id: testing_requirements
+    attributes:
+      label: Testing Requirements
+      description: Targeted tests, syntax/diff, validasi fungsi/keamanan dan bukti yang harus dilaporkan.
+    validations:
+      required: true
+  - type: textarea
+    id: deployment_impact
+    attributes:
+      label: Deployment Impact
+      description: Checkpoint milestone, kebutuhan full CI/deployment dan approval; atau N/A beralasan.
+    validations:
+      required: true
+  - type: textarea
+    id: rollback_considerations
+    attributes:
+      label: Rollback Considerations
+      description: Risiko, cara pemulihan, kompatibilitas schema dan perlindungan data.
+    validations:
+      required: true
+  - type: textarea
+    id: worker_instructions
+    attributes:
+      label: Worker Instructions
+      description: Linked branch, batas peran, label, commit/PR dan handoff Reviewer.
+    validations:
+      required: true
+  - type: textarea
+    id: definition_of_done
+    attributes:
+      label: Definition of Done
+      description: Bukti AC/checks/review/merge yang diperlukan; bedakan siap review dari pekerjaan selesai.
+    validations:
+      required: true
