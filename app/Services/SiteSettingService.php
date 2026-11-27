@@ -10,94 +10,130 @@ use Illuminate\Support\Str;
 class SiteSettingService
 {
     /**
-     * Mengambil seluruh pengaturan publik website.
-     *
-     * Hasil disimpan dalam cache agar query database
-     * tidak dijalankan berulang kali pada setiap request.
+     * Mengambil seluruh pengaturan publik.
      */
     public function publicSettings(): array
+    {
+        return collect($this->cachedSettings())
+            ->mapWithKeys(
+                fn (array $setting): array => [
+                    $setting['key'] =>
+                        $this->formatValue($setting),
+                ]
+            )
+            ->all();
+    }
+
+    /**
+     * Mengambil pengaturan publik berdasarkan kelompok.
+     */
+    public function settingsByGroup(
+        string $group
+    ): array {
+        return collect($this->cachedSettings())
+            ->where('group', $group)
+            ->mapWithKeys(
+                fn (array $setting): array => [
+                    $setting['key'] =>
+                        $this->formatValue($setting),
+                ]
+            )
+            ->all();
+    }
+
+    /**
+     * Mengambil satu nilai pengaturan publik.
+     */
+    public function get(
+        string $key,
+        mixed $default = null
+    ): mixed {
+        $settings = $this->publicSettings();
+
+        return $settings[$key] ?? $default;
+    }
+
+    /**
+     * Mengambil data melalui satu sumber cache.
+     */
+    private function cachedSettings(): array
     {
         return Cache::remember(
             SiteSetting::PUBLIC_CACHE_KEY,
             now()->addHours(12),
             function (): array {
 
-                $settings = SiteSetting::query()
+                return SiteSetting::query()
                     ->where('is_public', true)
                     ->orderBy('group')
                     ->orderBy('sort_order')
                     ->get([
+                        'group',
                         'key',
                         'value',
                         'type',
-                    ]);
+                    ])
+                    ->toArray();
 
-                return $settings
-                    ->mapWithKeys(function (SiteSetting $setting): array {
-
-                        $value = $setting->value;
-
-                        // Mengubah path gambar menjadi URL publik.
-                        if (
-                            $setting->type === 'image' &&
-                            filled($value)
-                        ) {
-                            $value = Str::startsWith(
-                                $value,
-                                ['http://', 'https://']
-                            )
-                                ? $value
-                                : Storage::disk('public')->url($value);
-                        }
-
-                        return [
-                            $setting->key => $value,
-                        ];
-
-                    })
-                    ->all();
             }
         );
     }
 
     /**
-     * Mengambil pengaturan berdasarkan kelompok.
-     *
-     * Contoh:
-     * general, contact, branding, seo.
+     * Mengubah nilai sesuai tipe pengaturan.
      */
-    public function settingsByGroup(string $group): array
-    {
-        return Cache::remember(
-            'site_settings.group.' . $group,
-            now()->addHours(12),
-            function () use ($group): array {
+    private function formatValue(
+        array $setting
+    ): ?string {
+        $value = $setting['value'] ?? null;
 
-                return SiteSetting::query()
-                    ->where('group', $group)
-                    ->where('is_public', true)
-                    ->orderBy('sort_order')
-                    ->pluck('value', 'key')
-                    ->all();
+        if (blank($value)) {
+            return null;
+        }
 
+        if ($setting['type'] === 'image') {
+
+            // Mendukung URL gambar eksternal yang valid.
+            if (
+                Str::startsWith(
+                    $value,
+                    ['http://', 'https://']
+                )
+            ) {
+                return filter_var(
+                    $value,
+                    FILTER_VALIDATE_URL
+                ) ? $value : null;
             }
-        );
+
+            // Mengubah path gambar lokal menjadi URL.
+            return Storage::disk('public')->url($value);
+        }
+
+        return $value;
     }
 
     /**
-     * Menghapus cache pengaturan website.
+     * Membersihkan cache pengaturan.
      */
     public function clearCache(): void
     {
-        Cache::forget(SiteSetting::PUBLIC_CACHE_KEY);
+        Cache::forget(
+            SiteSetting::PUBLIC_CACHE_KEY
+        );
 
+        // Membersihkan sisa cache konfigurasi lama.
         foreach ([
             'general',
             'contact',
             'branding',
             'seo',
         ] as $group) {
-            Cache::forget('site_settings.group.' . $group);
+
+            Cache::forget(
+                'site_settings.group.' . $group
+            );
+
         }
     }
 }
