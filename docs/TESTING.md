@@ -2,10 +2,12 @@
 
 Gunakan PHP yang memenuhi [composer.json](../composer.json), dengan ekstensi PDO SQLite, SQLite3 dan ekstensi Composer yang dibutuhkan proyek, serta dependency dari lock file yang sudah terpasang. [phpunit.xml](../phpunit.xml) memaksa lingkungan testing, database SQLite `:memory:`, key sintetis dan driver lokal. Jangan gunakan nilai key ini di luar test.
 
+Nilai keselamatan ditetapkan pada elemen `server` dan `env force="true"` dengan nilai identik. PHPUnit mengganti `$_SERVER` melalui `server`, sedangkan `env` memaksa `$_ENV` dan environment proses. Ini diperlukan karena dotenv Laravel memprioritaskan `$_SERVER`; `env force="true"` saja belum mengalahkan environment yang diwariskan shell. Pertahankan kesesuaian kedua kelompok saat mengubah konfigurasi test. Guard tetap menolak konfigurasi efektif tidak aman dan cache; normalisasi environment bukan pengganti guard.
+
 Test bootstrap menolak file konfigurasi cache sebelum bootstrap dan menolak konfigurasi efektif yang tidak aman setelah konfigurasi dimuat, sebelum provider dan RefreshDatabase berjalan. Test tidak memuat `.env` atau `.env.testing` pengguna. Migration eksisting berjalan dalam proses PHPUnit dan database sementara; tidak menggunakan seeder atau database operasional. Cache, session, queue dan mail memakai array/sync. Test feature homepage menggunakan `withoutVite()`; tidak memerlukan manifest atau server Vite dan tidak menguji rendering browser.
 
 ```powershell
-php vendor/bin/phpunit tests/Feature/HomePageTest.php tests/Feature/HealthCheckTest.php tests/Unit/TestEnvironmentSafetyTest.php
+php vendor/bin/phpunit tests/Feature/HomePageTest.php tests/Feature/HealthCheckTest.php tests/Feature/TestEnvironmentBootstrapTest.php tests/Unit/TestEnvironmentSafetyTest.php tests/Unit/ProcessEnvironmentTest.php
 php vendor/bin/phpunit
 ```
 
@@ -14,3 +16,7 @@ Jika CLI belum memuat ekstensi SQLite tetapi DLL yang cocok sudah tersedia, ekst
 SQLite tidak membuktikan parity MySQL, deployment, browser E2E, semua fungsi CMS, atau full CI. Pengujian migration pada database MySQL uji terpisah dan CI manual direncanakan pada pekerjaan berikutnya. Lihat [roadmap](ROADMAP.md) dan [workflow](WORKFLOW.md).
 
 Pada 27 November 2026, PHP 8.5.10 lokal belum memuat PDO SQLite secara default. Dengan ekstensi yang sudah tersedia diaktifkan melalui `-d extension=pdo_sqlite -d extension=sqlite3`, focused suite menghasilkan 18 test/97 assertion, suite lengkap 19 test/98 assertion, dan pengulangan focused suite 18 test/97 assertion (exit code 0). Percobaan pertama tanpa ekstensi menghasilkan tiga error driver; tidak ada koneksi database operasional. Hasil ini bukan full CI.
+
+Perbaikan review PR #4 menambahkan [regresi subprocess](../tests/Unit/ProcessEnvironmentTest.php) yang menjalankan [test bootstrap](../tests/Feature/TestEnvironmentBootstrapTest.php) dengan environment sintetis bertentangan untuk environment/key/database/URL serta cache/session/queue/mail/maintenance/broadcast. Test bootstrap memeriksa konfigurasi efektif, memastikan daftar koneksi database masih kosong, lalu memeriksa health. Subproses memakai PHP CLI yang sama dan konfigurasi INI default; tidak memerlukan ekstensi SQLite karena tidak membuka koneksi atau migration. Subproses dibatasi 60 detik dan output gagal tidak dicetak agar konfigurasi pengguna tidak bocor. Test negatif guard untuk konfigurasi efektif tidak aman, read/write override, dan fixture cache tetap dipertahankan.
+
+Regresi subprocess sebelum perbaikan gagal (1 test/1 assertion/1 failure, exit 1; child exit 2). Percobaan focused setelah penambahan konfigurasi menemukan assertion broadcast baru yang keliru mengharapkan string `"null"`; Laravel menormalisasinya menjadi `null`, dan assertion diperbaiki. Hasil akhir: focused 20 test/111 assertion, suite lengkap 21 test/112 assertion, focused ulang dengan environment sintetis bertentangan 20 test/111 assertion, seluruhnya exit 0. Reproduksi minimal Reviewer (`DB_DATABASE=review-sentinel.sqlite` pada proses shell khusus, health test) juga lulus 1 test/1 assertion, exit 0. Tidak ada perubahan INI global atau file environment/cache pengguna. M1 tetap menunggu review serta pekerjaan CI/CD terpisah.
