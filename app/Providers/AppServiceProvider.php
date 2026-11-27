@@ -18,12 +18,19 @@ use App\Models\SiteSetting;
 use App\Models\SocialLink;
 use App\Models\TeamMember;
 use App\Models\User;
+
 use App\Observers\HtmlContentObserver;
+
 use App\Policies\AdminOnlyPolicy;
 use App\Policies\ContactMessagePolicy;
 use App\Policies\ContentPolicy;
 use App\Policies\UserPolicy;
+
 use App\Services\HtmlSanitizerService;
+
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\RichEditor;
+
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -47,10 +54,12 @@ class AppServiceProvider extends ServiceProvider
         $this->registerPolicies();
 
         $this->registerObservers();
+
+        $this->configureSecureUploads();
     }
 
     /**
-     * Registrasi seluruh Laravel Policies.
+     * Registrasi Laravel Policies.
      */
     private function registerPolicies(): void
     {
@@ -152,7 +161,7 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * Registrasi Observer konten HTML.
+     * Registrasi Observer sanitasi konten HTML.
      */
     private function registerObservers(): void
     {
@@ -182,6 +191,48 @@ class AppServiceProvider extends ServiceProvider
 
         Achievement::observe(
             HtmlContentObserver::class
+        );
+    }
+
+    /**
+     * Konfigurasi keamanan upload secara global.
+     */
+    private function configureSecureUploads(): void
+    {
+        // ==========================================
+        // KEAMANAN FILE UPLOAD
+        // ==========================================
+
+        FileUpload::configureUsing(
+            function (FileUpload $component): void {
+
+                $component
+                    ->preventFilePathTampering()
+                    ->preserveFilenames(false);
+
+            }
+        );
+
+        // ==========================================
+        // KEAMANAN RICH TEXT EDITOR
+        // ==========================================
+
+        RichEditor::configureUsing(
+            function (RichEditor $component): void {
+
+                $component
+                    ->preventFileAttachmentPathTampering()
+
+                    ->fileAttachmentsAcceptedFileTypes([
+                        'image/jpeg',
+                        'image/png',
+                        'image/webp',
+                        'image/gif',
+                    ])
+
+                    ->fileAttachmentsMaxSize(5120);
+
+            }
         );
     }
 }
