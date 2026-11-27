@@ -2,9 +2,8 @@
 
 namespace App\Filament\Resources\Media\Tables;
 
-use Filament\Actions\BulkActionGroup;
+use App\Models\Media;
 use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -18,13 +17,16 @@ class MediaTable
         return $table
             ->columns([
 
-                ImageColumn::make('file_path')
+                ImageColumn::make('preview')
                     ->label('Preview')
                     ->disk('public')
                     ->square()
-                    ->visible(
-                        fn ($record): bool =>
+                    ->state(
+                        fn (Media $record): ?string =>
                             $record->file_type === 'image'
+                            && $record->disk === 'public'
+                                ? $record->file_path
+                                : null
                     ),
 
                 TextColumn::make('name')
@@ -42,32 +44,35 @@ class MediaTable
                 TextColumn::make('file_type')
                     ->label('Jenis File')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'image' => 'success',
-                        'document' => 'info',
-                        'video' => 'warning',
-                        'audio' => 'warning',
-                        default => 'gray',
-                    })
+                    ->color(
+                        fn (?string $state): string =>
+                            match ($state) {
+                                'image' => 'success',
+                                'document' => 'info',
+                                default => 'gray',
+                            }
+                    )
                     ->formatStateUsing(
-                        fn (string $state): string => match ($state) {
-                            'image' => 'Gambar',
-                            'document' => 'Dokumen',
-                            'video' => 'Video',
-                            'audio' => 'Audio',
-                            'other' => 'Lainnya',
-                            default => ucfirst($state),
-                        }
+                        fn (?string $state): string =>
+                            match ($state) {
+                                'image' => 'Gambar',
+                                'document' => 'Dokumen',
+                                'video' => 'Video',
+                                'audio' => 'Audio',
+                                default => 'Lainnya',
+                            }
                     ),
 
                 TextColumn::make('mime_type')
                     ->label('Format File')
+                    ->placeholder('-')
                     ->toggleable(),
 
                 TextColumn::make('file_size')
-                    ->label('Ukuran')
+                    ->label('Ukuran File')
                     ->formatStateUsing(
                         function ($state): string {
+
                             $bytes = (float) $state;
 
                             if ($bytes >= 1048576) {
@@ -84,15 +89,15 @@ class MediaTable
                                 ) . ' KB';
                             }
 
-                            return number_format($bytes) . ' Byte';
+                            return number_format($bytes)
+                                . ' Byte';
                         }
                     )
                     ->sortable(),
 
                 TextColumn::make('uploader.name')
                     ->label('Diunggah Oleh')
-                    ->placeholder('Tidak diketahui')
-                    ->sortable(),
+                    ->placeholder('Tidak diketahui'),
 
                 TextColumn::make('created_at')
                     ->label('Tanggal Upload')
@@ -118,28 +123,20 @@ class MediaTable
             ->recordActions([
 
                 EditAction::make()
-                    ->label('Edit'),
+                    ->label('Edit Metadata'),
 
                 DeleteAction::make()
-                    ->label('Hapus')
+                    ->label('Hapus Entri')
+                    ->modalHeading('Hapus entri media?')
+                    ->modalDescription(
+                        'Entri akan dihapus dari Media Library, tetapi file fisik tetap disimpan untuk menjaga konten yang mungkin masih menggunakannya.'
+                    )
                     ->requiresConfirmation(),
 
             ])
 
-            ->toolbarActions([
-
-                BulkActionGroup::make([
-                    DeleteBulkAction::make()
-                        ->label('Hapus yang Dipilih')
-                        ->requiresConfirmation(),
-                ]),
-
-            ])
-
             ->defaultSort('created_at', 'desc')
-
             ->paginated([10, 25, 50])
-
             ->defaultPaginationPageOption(10);
     }
 }

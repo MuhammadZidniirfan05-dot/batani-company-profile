@@ -2,27 +2,38 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class Media extends Model
 {
     use HasFactory;
 
+    public const MAX_FILE_SIZE = 20971520;
+
+    public const ALLOWED_TYPES = [
+        'image/jpeg' => ['jpg', 'jpeg'],
+        'image/png' => ['png'],
+        'image/webp' => ['webp'],
+        'image/gif' => ['gif'],
+        'application/pdf' => ['pdf'],
+    ];
+
+    protected $table = 'media';
+
     protected $fillable = [
         'name',
-        'file_name',
         'file_path',
-        'disk',
-        'mime_type',
-        'file_type',
-        'file_size',
         'alt_text',
         'description',
-        'uploaded_by',
+    ];
+
+    protected $attributes = [
+        'disk' => 'public',
     ];
 
     protected function casts(): array
@@ -34,104 +45,122 @@ class Media extends Model
 
     protected static function booted(): void
     {
-        // ==========================================
-        // MENCATAT METADATA FILE SECARA OTOMATIS
-        // ==========================================
+        static::creating(function (Media $media): void {
+
+            $media->disk = 'public';
+
+            $media->uploaded_by = auth()->id();
+
+        });
 
         static::saving(function (Media $media): void {
 
-            if (blank($media->disk)) {
-                $media->disk = 'public';
-            }
+            // File media yang sudah terdaftar tidak
+            // boleh diganti melalui edit metadata.
 
-            if (blank($media->file_path)) {
+            if ($media->exists) {
+
+                if (
+                    $media->isDirty('file_path')
+                    || $media->isDirty('disk')
+                ) {
+                    throw ValidationException::withMessages([
+                        'data.file_path' =>
+                            'File yang sudah terdaftar tidak dapat diganti. Unggah sebagai media baru.',
+                    ]);
+                }
+
                 return;
             }
 
-            $storage = Storage::disk($media->disk);
+            $media->disk = 'public';
 
-            if (! $storage->exists($media->file_path)) {
-                return;
-            }
+            $path = $media->file_path;
 
-            // Nama file yang tersimpan
-            $media->file_name = basename($media->file_path);
-
-            // MIME Type
-            $media->mime_type = $storage->mimeType(
-                $media->file_path
-            );
-
-            // Ukuran file dalam byte
-            $media->file_size = $storage->size(
-                $media->file_path
-            );
-
-            // Klasifikasi jenis file
-            $mimeType = $media->mime_type ?? '';
-
-            $media->file_type = match (true) {
-
-                Str::startsWith($mimeType, 'image/')
-                    => 'image',
-
-                Str::startsWith($mimeType, 'video/')
-                    => 'video',
-
-                Str::startsWith($mimeType, 'audio/')
-                    => 'audio',
-
-                Str::startsWith($mimeType, 'application/')
-                    => 'document',
-
-                Str::startsWith($mimeType, 'text/')
-                    => 'document',
-
-                default => 'other',
-            };
-
-            // Membuat nama media jika belum diisi
-            if (blank($media->name)) {
-                $media->name = pathinfo(
-                    $media->file_name,
-                    PATHINFO_FILENAME
-                );
-            }
-        });
-
-        // ==========================================
-        // MENCATAT ADMINISTRATOR PENGUNGGAH
-        // ==========================================
-
-        static::creating(function (Media $media): void {
-
-            if (blank($media->uploaded_by)) {
-                $media->uploaded_by = auth()->id();
-            }
-
-        });
-
-        // ==========================================
-        // MENGHAPUS FILE SAAT DATA MEDIA DIHAPUS
-        // ==========================================
-
-        static::deleting(function (Media $media): void {
+            // Validasi lokasi penyimpanan.
 
             if (
-                filled($media->file_path) &&
-                filled($media->disk)
+                ! is_string($path)
+                || ! preg_match(
+                    '/\Amedia\/[a-zA-Z0-9_-]+\.[a-zA-Z0-9]+\z/',
+                    $path
+                )
             ) {
-                Storage::disk($media->disk)
-                    ->delete($media->file_path);
+                throw ValidationException::withMessages([
+                    'data.file_path' =>
+                        'Lokasi file tidak valid.',
+                ]);
             }
+
+            $storage = Storage::disk('public');
+
+            // Memastikan file tersedia.
+
+            if (! $storage->exists($path)) {
+                throw ValidationException::withMessages([
+                    'data.file_path' =>
+                        'File tidak ditemukan pada penyimpanan.',
+                ]);
+            }
+
+            // Mengambil metadata asli file.
+
+            $mimeType = $storage->mimeType($path);
+
+            $extension = strtolower(
+                pathinfo($path, PATHINFO_EXTENSION)
+            );
+
+            $fileSize = $storage->size($path);
+
+            // Validasi MIME type dan ekstensi.
+
+            if (
+                ! is_string($mimeType)
+                || ! isset(self::ALLOWED_TYPES[$mimeType])
+                || ! in_array(
+                    $extension,
+                    self::ALLOWED_TYPES[$mimeType],
+                    true
+                )
+            ) {
+                throw ValidationException::withMessages([
+                    'data.file_path' =>
+                        'Format file tidak diizinkan.',
+                ]);
+            }
+
+            // Validasi ukuran file.
+
+            if (
+                $fileSize <= 0
+                || $fileSize > self::MAX_FILE_SIZE
+            ) {
+                throw ValidationException::withMessages([
+                    'data.file_path' =>
+                        'Ukuran file tidak valid atau melebihi 20 MB.',
+                ]);
+            }
+
+            // Menyimpan metadata otomatis.
+
+            $media->file_name = basename($path);
+
+            $media->mime_type = $mimeType;
+
+            $media->file_size = $fileSize;
+
+            $media->file_type =
+                str_starts_with($mimeType, 'image/')
+                    ? 'image'
+                    : 'document';
 
         });
     }
 
-    // ==========================================
-    // RELASI PENGUNGGAH
-    // ==========================================
-
+    /**
+     * Relasi administrator pengunggah.
+     */
     public function uploader(): BelongsTo
     {
         return $this->belongsTo(
@@ -140,17 +169,21 @@ class Media extends Model
         );
     }
 
-    // ==========================================
-    // SCOPE MEDIA
-    // ==========================================
-
-    public function scopeImages($query)
-    {
+    /**
+     * Mengambil media gambar.
+     */
+    public function scopeImages(
+        Builder $query
+    ): Builder {
         return $query->where('file_type', 'image');
     }
 
-    public function scopeDocuments($query)
-    {
+    /**
+     * Mengambil media dokumen.
+     */
+    public function scopeDocuments(
+        Builder $query
+    ): Builder {
         return $query->where('file_type', 'document');
     }
 }
