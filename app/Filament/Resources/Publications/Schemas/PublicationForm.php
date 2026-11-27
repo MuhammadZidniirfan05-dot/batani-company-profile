@@ -21,9 +21,7 @@ class PublicationForm
     {
         return $schema->components([
 
-            // ==========================================
             // INFORMASI PUBLIKASI
-            // ==========================================
 
             Section::make('Informasi Publikasi')
                 ->description('Informasi dasar publikasi dan kajian.')
@@ -60,13 +58,10 @@ class PublicationForm
                         ->label('Slug URL')
                         ->required()
                         ->maxLength(255)
+                        ->regex('/^[a-z0-9]+(?:-[a-z0-9]+)*$/')
                         ->unique(ignoreRecord: true)
-                        ->dehydrateStateUsing(
-                            fn (?string $state): string =>
-                                Str::slug($state ?? '')
-                        )
                         ->helperText(
-                            'Slug otomatis dibuat berdasarkan judul dan dapat diubah.'
+                            'Gunakan huruf kecil, angka, dan tanda hubung.'
                         )
                         ->columnSpanFull(),
 
@@ -76,24 +71,20 @@ class PublicationForm
                         ->searchable()
                         ->preload()
                         ->native(false)
-                        ->required()
-                        ->placeholder('Pilih kategori publikasi'),
+                        ->required(),
 
                     TextInput::make('authors')
                         ->label('Penulis / Tim Penyusun')
-                        ->maxLength(255)
-                        ->placeholder('Nama penulis atau tim penyusun'),
+                        ->maxLength(255),
 
                     TextInput::make('publisher')
                         ->label('Penerbit / Instansi')
-                        ->maxLength(255)
-                        ->placeholder('Nama penerbit atau instansi'),
+                        ->maxLength(255),
 
                     DatePicker::make('publication_date')
                         ->label('Tanggal Terbit Dokumen')
                         ->native(false)
-                        ->displayFormat('d/m/Y')
-                        ->placeholder('Pilih tanggal terbit dokumen'),
+                        ->displayFormat('d/m/Y'),
 
                     Textarea::make('abstract')
                         ->label('Abstrak / Ringkasan')
@@ -107,9 +98,7 @@ class PublicationForm
                 ])
                 ->columns(2),
 
-            // ==========================================
             // DOKUMEN DAN MEDIA
-            // ==========================================
 
             Section::make('Dokumen dan Media')
                 ->description('Unggah cover dan dokumen publikasi.')
@@ -118,9 +107,15 @@ class PublicationForm
                     FileUpload::make('cover_image')
                         ->label('Cover Publikasi')
                         ->image()
+                        ->acceptedFileTypes([
+                            'image/jpeg',
+                            'image/png',
+                            'image/webp',
+                        ])
                         ->disk('public')
                         ->directory('publications/covers')
                         ->visibility('public')
+                        ->preventFilePathTampering()
                         ->maxSize(5120)
                         ->imageEditor()
                         ->helperText(
@@ -133,26 +128,25 @@ class PublicationForm
                         ->acceptedFileTypes([
                             'application/pdf',
                         ])
-                        ->disk('public')
+                        ->disk('local')
                         ->directory('publications/documents')
-                        ->visibility('public')
+                        ->visibility('private')
+                        ->preventFilePathTampering()
                         ->maxSize(20480)
                         ->downloadable()
                         ->openable()
                         ->helperText(
-                            'Hanya PDF. Ukuran maksimal 20 MB.'
+                            'PDF maksimal 20 MB. Dokumen disimpan secara privat dan hanya dapat diunduh pengunjung setelah dipublikasikan.'
                         )
                         ->columnSpanFull(),
 
                 ])
                 ->columns(2),
 
-            // ==========================================
             // PENGATURAN PUBLIKASI
-            // ==========================================
 
             Section::make('Pengaturan Publikasi')
-                ->description('Pengaturan status dan jadwal penayangan.')
+                ->description('Atur status dan jadwal penayangan.')
                 ->schema([
 
                     Select::make('status')
@@ -172,7 +166,7 @@ class PublicationForm
                         ->displayFormat('d/m/Y H:i')
                         ->default(null)
                         ->helperText(
-                            'Kosongkan untuk publikasi langsung. Isi tanggal dan waktu mendatang untuk menjadwalkan publikasi.'
+                            'Kosongkan untuk publikasi langsung. Isi tanggal mendatang untuk penjadwalan.'
                         ),
 
                     Select::make('user_id')
@@ -180,39 +174,29 @@ class PublicationForm
                         ->relationship('author', 'name')
                         ->default(fn () => auth()->id())
                         ->disabled()
-                        ->dehydrated()
-                        ->required()
+                        ->dehydrated(false)
                         ->native(false)
                         ->helperText(
-                            'Otomatis mengikuti administrator yang sedang login.'
+                            'Administrator yang pertama kali membuat publikasi.'
                         ),
 
                 ])
                 ->columns(2),
 
-            // ==========================================
             // SEO
-            // ==========================================
 
             Section::make('Optimasi Mesin Pencari (SEO)')
-                ->description('Metadata untuk mesin pencari.')
                 ->schema([
 
                     TextInput::make('seo_title')
                         ->label('SEO Title')
-                        ->maxLength(255)
-                        ->helperText(
-                            'Judul yang digunakan pada hasil pencarian.'
-                        ),
+                        ->maxLength(255),
 
                     Textarea::make('seo_description')
                         ->label('SEO Description')
                         ->rows(3)
                         ->maxLength(320)
-                        ->columnSpanFull()
-                        ->helperText(
-                            'Deskripsi singkat untuk mesin pencari.'
-                        ),
+                        ->columnSpanFull(),
 
                 ])
                 ->columns(2)
