@@ -4,7 +4,7 @@
 
 BATANI Company Profile adalah aplikasi Laravel yang sudah ada; jangan membuat project pengganti. Repository [batani-company-profile](https://github.com/MuhammadZidniirfan05-dot/batani-company-profile) bersifat publik, branch utama main. Audit 27 November 2026 memakai baseline `2d8e1647cc8dd6206c3df6fd5ab025a124559f25`.
 
-Pada awal perencanaan, working tree bersih dan main sama dengan origin/main; GitHub CLI terautentikasi dengan akses ADMIN. [Issue #1](https://github.com/MuhammadZidniirfan05-dot/batani-company-profile/issues/1) selesai melalui [PR #2](https://github.com/MuhammadZidniirfan05-dot/batani-company-profile/pull/2), squash `45e957791ce1da8594b57e239c5be0c8e90953ea`. [Issue #3](https://github.com/MuhammadZidniirfan05-dot/batani-company-profile/issues/3) mengerjakan baseline pengujian terisolasi pada [M1](https://github.com/MuhammadZidniirfan05-dot/batani-company-profile/milestone/1). Status mutakhir harus dibaca dari GitHub.
+Pada awal perencanaan, working tree bersih dan main sama dengan origin/main; GitHub CLI terautentikasi dengan akses ADMIN. [Issue #1](https://github.com/MuhammadZidniirfan05-dot/batani-company-profile/issues/1) selesai melalui [PR #2](https://github.com/MuhammadZidniirfan05-dot/batani-company-profile/pull/2), squash `45e957791ce1da8594b57e239c5be0c8e90953ea`. [Issue #3](https://github.com/MuhammadZidniirfan05-dot/batani-company-profile/issues/3) selesai melalui [PR #4](https://github.com/MuhammadZidniirfan05-dot/batani-company-profile/pull/4), squash `058bbdae6ce5e55fa41b9cd7fd9052604c6fd90c`. [Issue #5](https://github.com/MuhammadZidniirfan05-dot/batani-company-profile/issues/5) mengerjakan fondasi CI manual pada [M1](https://github.com/MuhammadZidniirfan05-dot/batani-company-profile/milestone/1). Status mutakhir harus dibaca dari GitHub.
 
 Lingkungan pengembangan menggunakan Windows, Laragon, VS Code, Git, GitHub CLI dan NPM. Konteks pengguna menyebut PHP 8.5.12 dan Node.js 22, sedangkan audit CLI menemukan PHP 8.5.10 dan Node.js 24.14.1. Verifikasi ulang runtime pada setiap pekerjaan; jangan mengupgrade hanya untuk menyamakan angka.
 
@@ -35,7 +35,7 @@ Lingkungan pengembangan menggunakan Windows, Laragon, VS Code, Git, GitHub CLI d
 
 [tests](../tests) mencakup test homepage, health dan guard isolasi serta satu test unit contoh. [phpunit.xml](../phpunit.xml) memilih SQLite in-memory; migration eksisting dijalankan oleh test homepage pada database sementara. Lihat [panduan pengujian](TESTING.md) untuk perintah dan keterbatasan. Pengujian ini tidak membuktikan fungsi seluruh CMS, kompatibilitas MySQL, full CI atau staging.
 
-Staging dilaporkan sudah berhasil di-deploy oleh pengguna dan pernah memberi respons HTTPS/login admin. VPS, database, jumlah tabel, dan seluruh fungsi staging belum diverifikasi dalam pekerjaan dokumentasi ini. Detail operasional tidak disalin ke repository publik. Pipeline CI/CD belum tersedia pada baseline; desain dalam [workflow](WORKFLOW.md) adalah rencana M1, bukan pipeline aktif.
+Staging dilaporkan sudah berhasil di-deploy oleh pengguna dan pernah memberi respons HTTPS/login admin. VPS, database, jumlah tabel, dan seluruh fungsi staging belum diverifikasi dalam pekerjaan dokumentasi ini. Detail operasional tidak disalin ke repository publik. Fondasi CI manual dalam [panduan CI](CI.md) menunggu review/merge dan run GitHub pertama; deployment pipeline belum tersedia. Desain full CI/CD dalam [workflow](WORKFLOW.md) tetap rencana M1.
 
 ## Target CMS tanpa kategori
 

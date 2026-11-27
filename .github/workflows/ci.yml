@@ -1,0 +1,125 @@
+﻿name: CI manual
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-manual-${{ github.ref }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  php-test:
+    name: PHP dan PHPUnit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: shivammathur/setup-php@44454db4f0199b8b9685a5d763dc37cbf79108e1 # 2.36.0
+        with:
+          php-version: '8.5'
+          extensions: pdo_sqlite, sqlite3, mbstring, xml, intl, zip, curl, bcmath, gd
+          coverage: none
+          tools: composer:v2
+      - name: Periksa syntax PHP tracked
+        run: |
+          git ls-files -z -- '*.php' | xargs -0 -r -n1 php -l
+      - name: Validasi manifest Composer
+        run: composer validate --strict --no-check-publish
+      - name: Pasang dependency dari lock tanpa script
+        run: composer install --no-interaction --prefer-dist --no-progress --no-scripts
+      - name: Periksa platform
+        run: composer check-platform-reqs
+      - name: Jalankan suite terisolasi
+        run: vendor/bin/phpunit --do-not-cache-result
+
+  composer-audit:
+    name: Audit Composer
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: shivammathur/setup-php@44454db4f0199b8b9685a5d763dc37cbf79108e1 # 2.36.0
+        with:
+          php-version: '8.5'
+          coverage: none
+          tools: composer:v2
+      - name: Audit seluruh dependency lock
+        run: composer audit --locked --no-interaction
+
+  npm-audit:
+    name: Audit NPM
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+      - name: Audit seluruh dependency lock
+        run: npm audit --include=dev
+
+  frontend-build:
+    name: Build Vite
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+      - name: Pasang dependency dari lock
+        run: npm ci --no-audit
+      - name: Build frontend
+        run: npm run build
+      - name: Simpan build diagnostik
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: vite-diagnostic-${{ github.sha }}
+          path: public/build/
+          if-no-files-found: error
+          retention-days: 7
+
+  summary:
+    name: Ringkasan hasil
+    if: ${{ always() }}
+    needs: [php-test, composer-audit, npm-audit, frontend-build]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      RESULT_PHP: ${{ needs.php-test.result }}
+      RESULT_COMPOSER: ${{ needs.composer-audit.result }}
+      RESULT_NPM: ${{ needs.npm-audit.result }}
+      RESULT_BUILD: ${{ needs.frontend-build.result }}
+    steps:
+      - name: Catat hasil dan SHA
+        run: |
+          {
+            echo '## CI manual — bukan bukti deployment'
+            echo "SHA: $GITHUB_SHA"
+            echo "Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID (attempt $GITHUB_RUN_ATTEMPT)"
+            echo "PHP/test: $RESULT_PHP"
+            echo "Composer audit: $RESULT_COMPOSER"
+            echo "NPM audit: $RESULT_NPM"
+            echo "Build: $RESULT_BUILD"
+            echo 'Artifact build hanya diagnostik; semua job wajib harus sukses sebelum evaluasi checkpoint.'
+          } >> "$GITHUB_STEP_SUMMARY"
+          [[ "$RESULT_PHP" == success && "$RESULT_COMPOSER" == success && "$RESULT_NPM" == success && "$RESULT_BUILD" == success ]]
