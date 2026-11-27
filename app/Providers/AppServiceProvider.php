@@ -18,23 +18,43 @@ use App\Models\SiteSetting;
 use App\Models\SocialLink;
 use App\Models\TeamMember;
 use App\Models\User;
+use App\Observers\HtmlContentObserver;
 use App\Policies\AdminOnlyPolicy;
 use App\Policies\ContactMessagePolicy;
 use App\Policies\ContentPolicy;
 use App\Policies\UserPolicy;
+use App\Services\HtmlSanitizerService;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
+    /**
+     * Registrasi application services.
+     */
     public function register(): void
     {
-        //
+        $this->app->singleton(
+            HtmlSanitizerService::class
+        );
     }
 
+    /**
+     * Bootstrap application services.
+     */
     public function boot(): void
     {
-        // MODUL PROFIL PERUSAHAAN
+        $this->registerPolicies();
+
+        $this->registerObservers();
+    }
+
+    /**
+     * Registrasi seluruh Laravel Policies.
+     */
+    private function registerPolicies(): void
+    {
+        // PROFIL PERUSAHAAN
 
         Gate::policy(
             Page::class,
@@ -61,7 +81,7 @@ class AppServiceProvider extends ServiceProvider
             ContentPolicy::class
         );
 
-        // MODUL BERITA
+        // BERITA
 
         Gate::policy(
             NewsCategory::class,
@@ -73,7 +93,7 @@ class AppServiceProvider extends ServiceProvider
             ContentPolicy::class
         );
 
-        // MODUL PUBLIKASI DAN KAJIAN
+        // PUBLIKASI DAN KAJIAN
 
         Gate::policy(
             PublicationCategory::class,
@@ -85,7 +105,7 @@ class AppServiceProvider extends ServiceProvider
             ContentPolicy::class
         );
 
-        // MODUL PROJECT IT
+        // PROJECT IT
 
         Gate::policy(
             ProjectCategory::class,
@@ -128,6 +148,40 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(
             User::class,
             UserPolicy::class
+        );
+    }
+
+    /**
+     * Registrasi Observer konten HTML.
+     */
+    private function registerObservers(): void
+    {
+        News::observe(
+            HtmlContentObserver::class
+        );
+
+        Publication::observe(
+            HtmlContentObserver::class
+        );
+
+        ItProject::observe(
+            HtmlContentObserver::class
+        );
+
+        Page::observe(
+            HtmlContentObserver::class
+        );
+
+        TeamMember::observe(
+            HtmlContentObserver::class
+        );
+
+        OrganizationUnit::observe(
+            HtmlContentObserver::class
+        );
+
+        Achievement::observe(
+            HtmlContentObserver::class
         );
     }
 }
