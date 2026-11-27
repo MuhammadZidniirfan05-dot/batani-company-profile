@@ -30,6 +30,20 @@ CI manual ini belum membuktikan integrasi MySQL/migration pada service terpisah,
 
 Pada Windows/PHP 8.5.10/Node 24.14.1, PHPUnit dengan ekstensi SQLite diaktifkan per proses menghasilkan 21 test/112 assertion (exit 0). Lint 182 file PHP tracked, Composer validate, Composer audit --locked dan npm audit --include=dev lulus; kedua audit melaporkan 0 advisory/vulnerability pada saat dijalankan. Audit dijalankan dari salinan manifest/lock di direktori sementara; hasil audit dapat berubah. `npm ci --no-audit` dan `npm run build` pada salinan source terisolasi lulus, build memproses 635 modul. Sebuah percobaan persiapan salinan lewat pipe arsip PowerShell gagal karena arsip rusak; salinan ZIP berikutnya berhasil.
 
-Validasi workflow: parser YAML dan actionlint 1.7.12 lulus, termasuk pemeriksaan trigger tunggal, runner, permission, timeout dan pin action. SHA upstream diverifikasi melalui GitHub API. Run GitHub belum tersedia sebelum workflow berada di default branch; hasil lokal ini bukan bukti run runner GitHub atau full CI.
+Validasi workflow: parser YAML dan actionlint 1.7.12 lulus, termasuk pemeriksaan trigger tunggal, runner, permission, timeout dan pin action. SHA upstream diverifikasi melalui GitHub API. Saat validasi awal PR #6, run GitHub belum tersedia karena workflow belum berada di default branch; hasil lokal tersebut bukan bukti run runner GitHub atau full CI.
 
-Instalasi Composer bersih dengan `--no-scripts` pada salinan Windows di atas mencapai 144 ekstraksi dan tahap optimized autoload, tetapi dihentikan setelah menunggu beberapa menit tanpa hasil akhir (exit 1 akibat interupsi). Oleh karena itu, kompatibilitas instalasi bersih Composer dan package discovery pada runner Linux masih harus dibuktikan pada run GitHub pertama. PHPUnit yang lulus di atas memakai dependency lokal yang sudah tersedia; bukan bukti instalasi bersih tersebut.
+Instalasi Composer bersih dengan `--no-scripts` pada salinan Windows di atas mencapai 144 ekstraksi dan tahap optimized autoload, tetapi dihentikan setelah menunggu beberapa menit tanpa hasil akhir (exit 1 akibat interupsi). Karena itu, kompatibilitas instalasi bersih Composer dan package discovery pada runner Linux perlu dibuktikan secara terpisah; lihat run pertama di bawah. PHPUnit yang lulus di atas memakai dependency lokal yang sudah tersedia; bukan bukti instalasi bersih tersebut.
+
+## Run pertama GitHub Actions
+
+[Run 46033907792](https://github.com/MuhammadZidniirfan05-dot/batani-company-profile/actions/runs/46033907792), workflow_dispatch, attempt 1, dibuat 27 November 2026 pukul 16:28:26 UTC, selesai 16:29:04 UTC: **success** pada SHA `ad12dd1806fffaca299e451acdbfe22d3704ec31`. Ini menguji commit tersebut, bukan otomatis commit dokumentasi berikutnya.
+
+| Job | Hasil aktual |
+| --- | --- |
+| PHP dan PHPUnit | success: PHP lint, Composer validate, instalasi bersih dari lock `--no-scripts`, optimized autoload dan platform check sukses; PHPUnit 21 test/112 assertion. Suite yang melewati bootstrap Laravel mendukung bahwa package discovery otomatis berfungsi pada run ini; tidak ada langkah/log package discovery terpisah. |
+| Audit Composer | success; tidak ada security advisory pada waktu run. |
+| Audit NPM | success; 0 vulnerabilities pada waktu run. |
+| Build Vite | success; 635 modul diproses, upload artifact sukses. |
+| Ringkasan hasil | success; log langkah menunjukkan keempat variabel hasil bernilai success dan pemeriksaan kondisi berhasil. Konten tampilan summary tidak dibaca secara terpisah melalui CLI. |
+
+Metadata API mengonfirmasi artifact `vite-diagnostic-ad12dd1806fffaca299e451acdbfe22d3704ec31`, 76.297 bytes, SHA sama, dibuat 16:28:52 UTC dan kedaluwarsa 4 Desember 2026 16:28:51 UTC (tujuh hari). Isi artifact tidak diunduh/dieksekusi; konfigurasi allowlist hanya `public/build/`. Artifact tetap diagnostik, bukan bukti layak deploy. Semua step yang dilaporkan API berstatus success; tidak ada klaim MySQL, browser E2E, full CI, deployment atau penyelesaian M1.

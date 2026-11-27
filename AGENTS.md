@@ -2,16 +2,18 @@
 
 ## Mulai setiap pekerjaan
 
-1. Baca [konteks proyek](docs/PROJECT_CONTEXT.md), [roadmap](docs/ROADMAP.md), [workflow](docs/WORKFLOW.md), dan Issue aktif melalui GitHub CLI.
+1. Baca panduan ini, Issue aktif melalui GitHub CLI, roadmap dan source yang relevan; gunakan dokumen lain bila diperlukan, tanpa mengulang audit seluruh repository.
 2. Pastikan peran PLANNER, WORKER, atau REVIEWER sesuai instruksi pengguna. Pengguna mengganti model secara manual dalam satu chat; agent tidak mengganti model otomatis.
 3. Periksa Git status, branch, HEAD, remote, main terbaru, linked branch, Issue/PR, dan instruksi yang berlaku. Jangan menimpa perubahan pengguna. Jangan mengulang instalasi atau autentikasi yang masih berfungsi.
-4. Batasi satu pekerjaan implementasi aktif. Satu Issue memiliki satu linked branch dan satu PR utama menuju main. Jangan membuat seluruh Issue roadmap sekaligus.
+4. Gunakan Simplified Hybrid Coding: satu kelompok fitur per Issue, satu linked branch dan satu PR utama menuju main. Issue dapat memuat subpekerjaan dan beberapa commit terkait. Batasi satu pekerjaan implementasi aktif dan hindari Issue administratif terpisah untuk perubahan kecil yang masih dalam scope.
 
 ## Peran dan keluaran
 
 - PLANNER mengaudit source dan dependensi/risiko, menyusun scope, acceptance criteria terukur dan tes; membuat Issue tanpa duplikasi, milestone/label planned dan linked branch dari main terbaru yang aman; menyerahkan prompt Worker tanpa implementasi.
 - WORKER mengubah status menjadi in-progress, mengimplementasikan scope, menjalankan pemeriksaan relevan, meninjau diff, stage file spesifik, commit Bahasa Indonesia, push feature branch, membuat PR dengan Closes nomor aktual, lalu ready-for-review dan handoff Reviewer. Jangan merge, deploy, atau push main.
 - REVIEWER memeriksa Issue/source/diff/tests/checks/komentar aktual secara independen. Tulis CHANGES REQUESTED atau APPROVED melalui komentar PR karena akun GitHub sama. Merge hanya sesuai gerbang review dalam [workflow](docs/WORKFLOW.md). Setelah merge dan housekeeping, kembali PLANNER.
+
+Fast track: Worker boleh mengerjakan perubahan rendah risiko seperti label, ikon, urutan menu, typo, teks, styling atau komponen sederhana dalam scope Issue aktif tanpa Issue/PR tambahan. Ini tidak berlaku untuk perubahan database destruktif, autentikasi, otorisasi, keamanan, credential atau infrastruktur berisiko tinggi. Planner boleh mengelompokkan pekerjaan terkait dengan mencatat perubahan scope; jangan mengubah acceptance criteria sepihak. Reviewer mengumpulkan temuan blocking dalam satu review terarah.
 
 Status yang tersedia: planned, in-progress, ready-for-review, changes-requested, approved, merged, deployed, blocked. Hapus status sebelumnya ketika transisi; jangan mengklaim deployed tanpa bukti. Jika terhambat, gunakan blocked dengan alasan dan kebutuhan penyelesaian. Pertahankan Issue/branch/PR ketika memperbaiki review.
 
