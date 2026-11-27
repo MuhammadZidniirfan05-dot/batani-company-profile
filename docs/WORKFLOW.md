@@ -2,11 +2,13 @@
 
 ## Prinsip koordinasi
 
-GitHub Issues, linked branches, PR, labels, milestones dan dokumentasi menjadi pusat koordinasi. Baca [AGENTS](../AGENTS.md), [Project Context](PROJECT_CONTEXT.md) dan [Roadmap](ROADMAP.md). Gunakan GitHub CLI; verifikasi autentikasi sebelum mengulang setup. Satu pekerjaan implementasi aktif, satu Issue/linked branch/PR utama. Model Planner/Reviewer dan Worker dipilih manual oleh pengguna dalam satu chat; agent tidak mengganti model otomatis.
+GitHub Issues, linked branches, PR, labels, milestones dan dokumentasi menjadi pusat koordinasi. Gunakan Simplified Hybrid Coding: satu kelompok fitur/Issue/linked branch/PR utama, dengan beberapa subpekerjaan dan commit terkait; beberapa kelompok membentuk milestone. Baca [AGENTS](../AGENTS.md), Issue aktif, [Roadmap](ROADMAP.md) dan source yang relevan; dokumen lain dibaca bila diperlukan. Gunakan GitHub CLI dan hindari audit seluruh repository atau Issue administratif berulang. Model Planner/Reviewer dan Worker dipilih manual oleh pengguna dalam satu chat; agent tidak mengganti model otomatis.
+
+Fast track berlaku bagi perubahan rendah risiko seperti label, ikon, nama/urutan menu, typo, teks, styling atau komponen sederhana yang masih sesuai scope Issue aktif; tidak perlu Issue atau PR terpisah. Perubahan database destruktif, autentikasi, otorisasi, keamanan, credential dan infrastruktur berisiko tinggi tetap mengikuti persetujuan dan pengujian yang berlaku. Kelompokkan pekerjaan terkait dalam Issue; Planner mencatat perubahan scope yang sah tanpa mengubah acceptance criteria sepihak.
 
 ## PLANNER
 
-1. Audit instruksi, source relevan, status Git, main terbaru, remote, Issue/PR terbuka, milestone/labels dan perubahan pengguna. Jangan menimpa perubahan atau membuat Issue duplikat.
+1. Periksa Issue aktif, source dan status Git yang relevan, baseline dan perubahan pengguna. Jangan menimpa perubahan atau membuat Issue duplikat; audit tambahan dilakukan sesuai risiko.
 2. Tentukan pekerjaan berikut berdasarkan roadmap: scope/out of scope, dependensi/risiko, rencana teknis, acceptance criteria terukur, targeted tests, database/security/deployment/rollback.
 3. Buat satu Issue memakai [Issue Form](../.github/ISSUE_TEMPLATE/implementation.yml), pilih milestone, label planned. Jangan membuat semua Issue roadmap sekaligus.
 4. Buat linked branch dari main terbaru jika aman, sesuai nomor Issue aktual. Handoff ke Worker; jangan mengimplementasikan fitur sebagai Planner.
@@ -14,7 +16,7 @@ GitHub Issues, linked branches, PR, labels, milestones dan dokumentasi menjadi p
 ## WORKER
 
 1. Baca Issue lengkap dan instruksi, verifikasi linked branch/HEAD/status dan pekerjaan pengguna. Ubah planned menjadi in-progress.
-2. Implementasikan hanya scope Issue. Gunakan identifier Bahasa Inggris dan konvensi Laravel/Filament/Vue. Jalankan syntax/targeted tests, validasi fungsional dan keamanan bagian diubah, perbaiki error, periksa diff.
+2. Implementasikan seluruh subpekerjaan terkait dalam scope Issue; beberapa commit pada branch yang sama diperbolehkan. Gunakan identifier Bahasa Inggris dan konvensi Laravel/Filament/Vue. Jalankan syntax/targeted tests, validasi fungsional dan keamanan bagian diubah, perbaiki error, periksa diff.
 3. Stage file spesifik; commit Bahasa Indonesia; push feature branch; buat PR menuju main menggunakan [PR template](../.github/PULL_REQUEST_TEMPLATE.md) dan `Closes #ISSUE_NUMBER` yang diganti nomor aktual.
 4. Sertakan bukti tes/build jika relevan, pemetaan acceptance criteria, keterbatasan, dampak database/security/deployment/rollback. Ganti in-progress menjadi ready-for-review pada Issue dan PR, lalu handoff Reviewer.
 
@@ -33,7 +35,7 @@ Baca Issue asli, acceptance criteria, PR, diff aktual, source terdampak, tests, 
 
 ### CHANGES REQUESTED
 
-Tulis komentar PR berisi severity, file/lokasi, kondisi aktual, harapan, alasan penolakan, instruksi perbaikan, tes yang diulang dan kriteria belum terpenuhi. Ganti status Issue/PR menjadi changes-requested dan berikan prompt Worker. Gunakan Issue, branch, dan PR yang sama; jangan memulai pekerjaan lain sebelum blocking findings selesai. Worker kembali in-progress, memperbaiki dan mengirim ready-for-review kembali.
+Kumpulkan seluruh temuan blocking yang ditemukan dalam satu komentar PR berisi severity, file/lokasi, kondisi aktual, harapan, alasan penolakan, instruksi perbaikan, tes yang diulang dan kriteria belum terpenuhi. Ganti status Issue/PR menjadi changes-requested dan berikan satu prompt Worker. Gunakan Issue, branch, dan PR yang sama; jangan memulai pekerjaan lain sebelum blocking findings selesai. Worker kembali in-progress, memperbaiki dan mengirim ready-for-review kembali.
 
 ### APPROVED dan merge
 
