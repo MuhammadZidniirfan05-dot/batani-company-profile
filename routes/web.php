@@ -7,6 +7,7 @@ use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Public\ItProjectController;
 use App\Http\Controllers\Public\NewsController;
 use App\Http\Controllers\Public\PublicationController;
+use App\Http\Controllers\Public\SearchController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -171,9 +172,13 @@ Route::prefix('kontak')
 
 /*
 |--------------------------------------------------------------------------
-| PENCARIAN GLOBAL
+| GLOBAL SEARCH
 |--------------------------------------------------------------------------
-|
-| Akan ditambahkan setelah SearchController selesai.
-|
 */
+
+Route::get(
+    '/search',
+    [SearchController::class, 'index']
+)
+    ->middleware('throttle:60,1')
+    ->name('search.index');
